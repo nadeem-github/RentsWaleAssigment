@@ -8,24 +8,24 @@
                     </div>
                     <div class="card-body">
                         <form [formGroup]="signupForm" (ngSubmit)="signup()">
-                            <div class="mb-3">
+                            <div class="mb-4 position-relative">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" id="username" class="form-control" formControlName="username" />
-                                <div *ngIf="signupForm.get('username')?.invalid && signupForm.get('username')?.touched" class="text-danger">
+                                <div *ngIf="signupForm.get('username')?.invalid && signupForm.get('username')?.touched" class="text-danger position-absolute">
                                     Username is required.
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4 position-relative">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" id="password" class="form-control" formControlName="password" />
-                                <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="text-danger">
+                                <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="text-danger position-absolute">
                                     Password is required.
                                 </div>
                             </div>
                             <div *ngIf="successMessage" class="alert alert-success">
                                 {{ successMessage }}
                             </div>
-                            <button type="submit" class="btn btn-primary w-100" [disabled]="signupForm.invalid">Signup</button>
+                            <button type="submit" class="btn btn-primary w-100 mt-2" [disabled]="signupForm.invalid">Signup</button>
                             <p class="mt-3 text-center">
                                 Already have an account? <a routerLink="/login">Login</a>
                             </p>
