@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-signup',
@@ -8,15 +8,27 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./signup.component.scss']
 })
 export class SignupComponent {
-  username = '';
-  password = '';
-  message = '';
+  signupForm: FormGroup;
+  successMessage = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private fb: FormBuilder, private router: Router) {
+    this.signupForm = this.fb.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required]
+    });
+  }
 
   signup(): void {
-    this.authService.signup(this.username, this.password);
-    this.message = 'Signup successful! Please login.';
-    this.router.navigate(['/login']);
+    if (this.signupForm.valid) {
+      const { username, password } = this.signupForm.value;
+
+      if (!localStorage.getItem(username)) {
+        localStorage.setItem(username, JSON.stringify({ password }));
+        this.successMessage = 'Signup successful! Redirecting to login...';
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+      } else {
+        this.successMessage = 'Username already exists. Please login.';
+      }
+    }
   }
 }

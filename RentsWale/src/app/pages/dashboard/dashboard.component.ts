@@ -9,6 +9,8 @@ import { Task, TaskService } from 'src/app/services/task.service';
 })
 export class DashboardComponent {
   tasks: Task[] = [];
+  filteredTasks: Task[] = []; 
+  searchTerm: string = '';
   currentTask: Task = {
     id: 0,
     title: '',
@@ -17,13 +19,14 @@ export class DashboardComponent {
     priority: 'Low',
     status: 'In Progress',
   };
-  
+
 
   @ViewChild('editModal') editModal: any;
   @ViewChild('deleteModal') deleteModal: any;
 
   constructor(private taskService: TaskService, private modalService: NgbModal) {
     this.tasks = this.taskService.getTasks();
+    this.filteredTasks = [...this.tasks];
   }
 
   addNewTask(): void {
@@ -35,9 +38,13 @@ export class DashboardComponent {
       priority: 'Medium',
       status: 'In Progress',
     };
+    
+    // Add the new task to tasks
     this.taskService.addTask(newTask);
     this.tasks = this.taskService.getTasks();
+    this.filterTasks(); 
   }
+  
 
   markAsCompleted(taskId: number): void {
     const task = this.tasks.find(t => t.id === taskId);
@@ -49,15 +56,16 @@ export class DashboardComponent {
   }
 
   editTask(task: Task): void {
-    this.currentTask = { ...task }; // Clone the task to avoid modifying directly
+    this.currentTask = { ...task }; 
     this.modalService.open(this.editModal, { centered: true });
   }
-  
+
 
   updateTask(): void {
     if (this.currentTask) {
       this.taskService.updateTask(this.currentTask);
       this.tasks = this.taskService.getTasks();
+      this.filterTasks();
     }
   }
 
@@ -70,6 +78,16 @@ export class DashboardComponent {
     if (taskId) {
       this.taskService.deleteTask(taskId);
       this.tasks = this.taskService.getTasks();
+      this.filterTasks();
     }
+  }
+
+  filterTasks(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredTasks = this.tasks.filter(task =>
+      task.priority.toLowerCase().includes(term) ||
+      task.dueDate.toLowerCase().includes(term) || 
+      task.status.toLowerCase().includes(term)
+    );
   }
 }

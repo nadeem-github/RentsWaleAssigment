@@ -1,95 +1,104 @@
-<div class="container">
-    <div class="row fadeInDown">
-        <div class="col-xxl-8 col-xl-8 col-lg-9 col-md-9 col-sm-12 mb-3">
-            <h1>Task Management Dashboard</h1>
-        </div>
-        <div class="col-xxl-4 col-xl-4 col-lg-3 col-md-3 col-sm-12 text-center text-md-end mb-3">
-            <button class="btn btn-primary" (click)="addNewTask()">Add New Task</button>
-        </div>
-    </div>
+<section class="py-4">
+    <div class="container">
+        <h1 class="mb-4 fadeInDown text-center text-sm-start">Task Management Dashboard</h1>
 
-    <div class="row">
-        <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-3" *ngFor="let task of tasks">
-            <div class="card shadow fadeIn">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">{{ task.title }}</h4>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">{{ task.description }}</p>
-                    <p><strong>Priority:</strong> {{ task.priority }}</p>
-    
-                    <p>
-                        <strong class="me-2">Status:</strong>
-                        <span [ngClass]="{'bg-warning text-dark': task.status === 'In Progress', 'bg-success text-white': task.status === 'Completed'}" class="badge">
-                            {{ task.status }}
-                        </span>
-                    </p>
-                </div>
-                <div class="card-footer text-center">
-                    <button class="btn btn-success" (click)="markAsCompleted(task.id)">Mark as Completed</button>
-                    <button class="btn btn-warning mx-3" (click)="editTask(task)">Edit</button>
-                    <button class="btn btn-danger" (click)="confirmDelete(task)">Delete</button>
+        <div class="card shadow-sm fadeInDown mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xxl-5 col-xl-5 col-lg-6 col-md-8 col-sm-12 mb-4 mb-sm-0">
+                        <input type="text" class="form-control shadow-none rounded-1" placeholder="Search by Priority, Due Date, or Status" [(ngModel)]="searchTerm" (input)="filterTasks()" />
+                    </div>
+                    <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-4 col-sm-12 text-center text-md-end">
+                        <button class="btn btn-primary" (click)="addNewTask()">Add New Task</button>
+                    </div>
                 </div>
             </div>
         </div>
+    
+        <div class="row">
+            <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3"*ngFor="let task of filteredTasks">
+                <div class="card shadow-sm fadeIn">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">{{ task.title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text"><strong>Description:</strong> {{ task.description }}</p>
+                        <p><strong>Due Date:</strong> {{ task.dueDate | date: 'dd MMM yyyy, hh:mm a' }}</p>
+                        <p><strong>Priority:</strong> {{ task.priority }}</p>
+        
+                        <p class="mb-0">
+                            <strong class="me-2">Status:</strong>
+                            <span [ngClass]="{'bg-warning text-dark': task.status === 'In Progress', 'bg-success text-white': task.status === 'Completed'}" class="badge">
+                                {{ task.status }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class="btn btn-success rounded-1" (click)="markAsCompleted(task.id)">Mark as Completed</button>
+                        <button class="btn btn-warning rounded-1 mx-1 mx-lg-3" (click)="editTask(task)">Edit</button>
+                        <button class="btn btn-danger rounded-1" (click)="confirmDelete(task)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+          
+    
+        <!-- Modal for editing a task -->
+        <ng-template #editModal let-modal>
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="editTitle" class="form-label">Title</label>
+                        <input type="text" id="editTitle" class="form-control" [(ngModel)]="currentTask!.title" name="title" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Description</label>
+                        <textarea id="editDescription" class="form-control" [(ngModel)]="currentTask!.description" name="description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPriority" class="form-label">Priority</label>
+                        <select id="editPriority" class="form-select" [(ngModel)]="currentTask!.priority" name="priority">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStatus" class="form-label">Status</label>
+                        <select id="editStatus" class="form-select" [(ngModel)]="currentTask!.status" name="status">
+                            <option>In Progress</option>
+                            <option>Completed</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="updateTask(); modal.dismiss()">Save Changes</button>
+            </div>
+        </ng-template>
+    
+    
+        <!-- Modal for delete confirmation -->
+        <ng-template #deleteModal let-modal>
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this task?</p>
+                <p><strong>{{ currentTask!.title }}</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">No</button>
+                <button type="button" class="btn btn-danger" (click)="deleteTask(currentTask!.id); modal.dismiss()">
+                    Yes
+                </button>
+            </div>
+        </ng-template>
     </div>
-      
-
-    <!-- Modal for editing a task -->
-    <ng-template #editModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Edit Task</h5>
-            <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-        </div>
-        <div class="modal-body">
-            <form>
-                <div class="mb-3">
-                    <label for="editTitle" class="form-label">Title</label>
-                    <input type="text" id="editTitle" class="form-control" [(ngModel)]="currentTask!.title" name="title" />
-                </div>
-                <div class="mb-3">
-                    <label for="editDescription" class="form-label">Description</label>
-                    <textarea id="editDescription" class="form-control" [(ngModel)]="currentTask!.description" name="description"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="editPriority" class="form-label">Priority</label>
-                    <select id="editPriority" class="form-select" [(ngModel)]="currentTask!.priority" name="priority">
-                        <option>Low</option>
-                        <option>Medium</option>
-                        <option>High</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="editStatus" class="form-label">Status</label>
-                    <select id="editStatus" class="form-select" [(ngModel)]="currentTask!.status" name="status">
-                        <option>In Progress</option>
-                        <option>Completed</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="updateTask(); modal.dismiss()">Save Changes</button>
-        </div>
-    </ng-template>
-
-
-    <!-- Modal for delete confirmation -->
-    <ng-template #deleteModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Confirm Delete</h5>
-            <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-        </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete this task?</p>
-            <p><strong>{{ currentTask!.title }}</strong></p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">No</button>
-            <button type="button" class="btn btn-danger" (click)="deleteTask(currentTask!.id); modal.dismiss()">
-                Yes
-            </button>
-        </div>
-    </ng-template>
-</div>
+</section>

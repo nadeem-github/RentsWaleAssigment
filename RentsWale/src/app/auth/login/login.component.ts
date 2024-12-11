@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -8,17 +8,26 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  username = '';
-  password = '';
+  loginForm: FormGroup;
   errorMessage = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private fb: FormBuilder, private router: Router) {
+    this.loginForm = this.fb.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required]
+    });
+  }
 
   login(): void {
-    if (this.authService.login(this.username, this.password)) {
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.errorMessage = 'Invalid username or password.';
+    if (this.loginForm.valid) {
+      const { username, password } = this.loginForm.value;
+      const storedUser = JSON.parse(localStorage.getItem(username) || '{}');
+      
+      if (storedUser && storedUser.password === password) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMessage = 'Invalid username or password. Please signup.';
+      }
     }
   }
 }
